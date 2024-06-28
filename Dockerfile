@@ -11,9 +11,12 @@ RUN apk add --no-cache bash
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN buildDeps=( \
+		autoconf \
+		automake \
 		curl \
 		g++ \
 		gnutls-dev \
+		gperf \
 		gpgme \
 		libev-dev \
 		libnl3-dev \
@@ -22,17 +25,19 @@ RUN buildDeps=( \
 		linux-pam-dev \
 		lz4-dev \
 		make \
+		protobuf-c-compiler \
 		readline-dev \
 		tar \
 		xz \
 	); \
 	set -x \
 	&& apk add --update --virtual .build-deps "${buildDeps[@]}" \
-	&& curl -SL --connect-timeout 8 --max-time 120 --retry 128 --retry-delay 5 "ftp://ftp.infradead.org/pub/ocserv/ocserv-$OC_VERSION.tar.xz" -o ocserv.tar.xz \
+	&& curl -SL --connect-timeout 8 --max-time 120 --retry 128 --retry-delay 5 "https://gitlab.com/openconnect/ocserv/-/archive/$OC_VERSION/ocserv-$OC_VERSION.tar.gz" -o ocserv.tar.gz \
 	&& mkdir -p /usr/src/ocserv \
-	&& tar -xf ocserv.tar.xz -C /usr/src/ocserv --strip-components=1 \
-	&& rm ocserv.tar.xz* \
+	&& tar -xzf ocserv.tar.gz -C /usr/src/ocserv --strip-components=1 \
+	&& rm ocserv.tar.gz* \
 	&& cd /usr/src/ocserv \
+	&& autoreconf -fvi \
 	&& ./configure \
 	&& make \
 	&& make install \
